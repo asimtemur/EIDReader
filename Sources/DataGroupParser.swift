@@ -1,10 +1,12 @@
 //
-//  File.swift
-//  
+//  DataGroupParser.swift
+//  EIDReader
 //
-//  Created by Andy Qua on 14/06/2019.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
+import UIKit
 import Foundation
 import OpenSSL
 
@@ -411,10 +413,15 @@ public class DataGroup2 : DataGroup {
         
         // Make sure that the image data at least has a valid header
         // Either JPG or JPEG2000
-
         let jpegHeader : [UInt8] = [0xff,0xd8,0xff,0xe0,0x00,0x10,0x4a,0x46,0x49,0x46]
         let jpeg2000BitmapHeader : [UInt8] = [0x00,0x00,0x00,0x0c,0x6a,0x50,0x20,0x20,0x0d,0x0a]
         let jpeg2000CodestreamBitmapHeader : [UInt8] = [0xff,0x4f,0xff,0x51]
+        
+        if data.count < offset + jpegHeader.count &&
+            data.count < offset + jpeg2000BitmapHeader.count &&
+            data.count < offset + jpeg2000CodestreamBitmapHeader.count {
+            throw TagError.ImageNotFound
+        }
 
         if [UInt8](data[offset..<offset+jpegHeader.count]) != jpegHeader &&
             [UInt8](data[offset..<offset+jpeg2000BitmapHeader.count]) != jpeg2000BitmapHeader &&

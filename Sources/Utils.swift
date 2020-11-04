@@ -1,9 +1,9 @@
 //
 //  Utils.swift
-//  NFCTest
+//  EIDReader
 //
-//  Created by Andy Qua on 09/06/2019.
-//  Copyright © 2019 Andy Qua. All rights reserved.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
 import UIKit
@@ -195,7 +195,6 @@ public func mac(key : [UInt8], msg : [UInt8]) -> [UInt8]{
 /// @type data: A binary string.
 /// @return: A tuple with the decoded hexa length and the length of the asn.1 encoded value.
 /// @raise asn1Exception: If the parameter does not follow the asn.1 notation.
-
 @available(iOS 13, *)
 public func asn1Length( _ data: ArraySlice<UInt8> ) throws -> (Int, Int) {
     return try asn1Length( Array(data) )
@@ -295,4 +294,3 @@ func calcSHA384Hash( _ data: [UInt8] ) -> [UInt8] {
     fatalError("Couldn't import CryptoKit")
     #endif
 }
-

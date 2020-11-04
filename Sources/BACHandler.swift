@@ -1,9 +1,9 @@
 //
 //  BACHandler.swift
-//  NFCTest
+//  EIDReader
 //
-//  Created by Andy Qua on 07/06/2019.
-//  Copyright © 2019 Andy Qua. All rights reserved.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
 import Foundation

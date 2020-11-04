@@ -1,9 +1,9 @@
 //
-//  TagHandler.swift
-//  NFCTest
+//  TagReader.swift
+//  EIDReader
 //
-//  Created by Andy Qua on 09/06/2019.
-//  Copyright © 2019 Andy Qua. All rights reserved.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
 import Foundation
@@ -40,6 +40,7 @@ public enum TagError: Error {
     case DataGroupNotRead
     case UnknownTag
     case UnknownImageFormat
+    case ImageNotFound
     case NotImplemented
     case TagNotValid
     case ConnectionError
@@ -65,6 +66,7 @@ public enum TagError: Error {
         case .DataGroupNotRead: return "DataGroupNotRead"
         case .UnknownTag: return "UnknownTag"
         case .UnknownImageFormat: return "UnknownImageFormat"
+        case .ImageNotFound: return "ImageNotFound"
         case .NotImplemented: return "NotImplemented"
         case .TagNotValid: return "TagNotValid"
         case .ConnectionError: return "ConnectionError"
@@ -261,7 +263,6 @@ public class TagReader {
                 
                 //print( "Got \(binToHexRep(response.data)) which is \(leftToRead) bytes with offset \(o)" )
                 self.header = [UInt8](response.data[..<offset])//response.data
-
                 
                 Log.debug( "Amount of data to read - \(leftToRead)" )
                 self.readBinaryData(leftToRead: leftToRead, amountRead: offset, completed: completed)
@@ -432,4 +433,3 @@ public class TagReader {
         return "Unknown error - sw1: 0x\(binToHexRep(sw1)), sw2 - 0x\(binToHexRep(sw2)) "
     }
 }
-

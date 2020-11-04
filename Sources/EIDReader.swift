@@ -1,9 +1,9 @@
 //
 //  PassportReader.swift
-//  NFCTest
+//  EIDReader
 //
-//  Created by Andy Qua on 11/06/2019.
-//  Copyright © 2019 Andy Qua. All rights reserved.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
 import UIKit
@@ -40,8 +40,8 @@ extension NFCViewDisplayMessage {
                 return "Connection error. Please try again."
             case TagError.InvalidMRZKey:
                 return "MRZ Key not valid for this document."
-            case TagError.ResponseError(let description, let sw1, let sw2):
-                return "Sorry, there was a problem reading the passport. \(description) - (0x\(sw1), 0x\(sw2)"
+            case TagError.ResponseError(let description):
+                return "Sorry, there was a problem reading the passport. \(description)"
             default:
                 return "Sorry, there was a problem reading the passport. Please try again"
             }
@@ -59,9 +59,9 @@ extension NFCViewDisplayMessage {
 }
 
 @available(iOS 13, *)
-public class PassportReader : NSObject {
+public class EIDReader : NSObject {
     
-    private var passport : NFCPassportModel = NFCPassportModel()
+    private var passport : NFCIdentityModel = NFCIdentityModel()
     private var readerSession: NFCTagReaderSession?
     private var elementReadAttempts = 0
     private var currentlyReadingDataGroup : DataGroupId?
@@ -74,10 +74,12 @@ public class PassportReader : NSObject {
     private var bacHandler : BACHandler?
     private var mrzKey : String = ""
     
-    private var scanCompletedHandler: ((NFCPassportModel?, TagError?)->())!
+    private var scanCompletedHandler: ((NFCIdentityModel?, TagError?)->())!
+    private var onSessionTimeOut: (() -> Void)?
     private var nfcViewDisplayMessageHandler: ((NFCViewDisplayMessage) -> String?)?
     private var masterListURL : URL?
     private var shouldNotReportNextReaderSessionInvalidationErrorUserCanceled : Bool = false
+    private var autoClose: Bool = true
 
     public init( masterListURL: URL? = nil ) {
         super.init()
@@ -89,14 +91,24 @@ public class PassportReader : NSObject {
         self.masterListURL = masterListURL
     }
     
-    public func readPassport( mrzKey : String, tags: [DataGroupId] = [], skipSecureElements :Bool = true, customDisplayMessage: ((NFCViewDisplayMessage) -> String?)? = nil, completed: @escaping (NFCPassportModel?, TagError?)->()) {
-        self.passport = NFCPassportModel()
+    public func setAutoClose(autoClose: Bool) {
+        self.autoClose = autoClose
+    }
+    
+    internal func readEID( mrzKey : String,
+                           tags: [DataGroupId] = [],
+                           skipSecureElements :Bool = true,
+                           customDisplayMessage: ((NFCViewDisplayMessage) -> String?)? = nil,
+                           completed: @escaping (NFCIdentityModel?, TagError?)->(),
+                           onSessionTimeOut: (() -> Void)?) {
+        self.passport = NFCIdentityModel()
         self.mrzKey = mrzKey
         self.dataGroupsToRead.removeAll()
         self.dataGroupsToRead.append( contentsOf:tags)
         self.scanCompletedHandler = completed
         self.nfcViewDisplayMessageHandler = customDisplayMessage
         self.skipSecureElements = skipSecureElements
+        self.onSessionTimeOut = onSessionTimeOut
         
         // If no tags specified, read all
         if self.dataGroupsToRead.count == 0 {
@@ -123,7 +135,7 @@ public class PassportReader : NSObject {
 }
 
 @available(iOS 13, *)
-extension PassportReader : NFCTagReaderSessionDelegate {
+extension EIDReader : NFCTagReaderSessionDelegate {
     // MARK: - NFCTagReaderSessionDelegate
     public func tagReaderSessionDidBecomeActive(_ session: NFCTagReaderSession) {
         // If necessary, you may perform additional operations on session start.
@@ -136,10 +148,17 @@ extension PassportReader : NFCTagReaderSessionDelegate {
         // You must create a new session to restart RF polling.
         Log.debug( "tagReaderSession:didInvalidateWithError - \(error)" )
         self.readerSession = nil
-
-        if let readerError = error as? NFCReaderError, readerError.code == NFCReaderError.readerSessionInvalidationErrorUserCanceled
-            && self.shouldNotReportNextReaderSessionInvalidationErrorUserCanceled {
-            self.shouldNotReportNextReaderSessionInvalidationErrorUserCanceled = false
+        if let readerError = error as? NFCReaderError {
+            if readerError.code == NFCReaderError.readerSessionInvalidationErrorSessionTimeout {
+                onSessionTimeOut?()
+                return
+            }
+            
+            if readerError.code == NFCReaderError.readerSessionInvalidationErrorUserCanceled
+                       && self.shouldNotReportNextReaderSessionInvalidationErrorUserCanceled {
+                       self.shouldNotReportNextReaderSessionInvalidationErrorUserCanceled = false
+            }
+            
         } else {
             var userError = TagError.UnexpectedError
             if let readerError = error as? NFCReaderError {
@@ -202,7 +221,7 @@ extension PassportReader : NFCTagReaderSessionDelegate {
 }
 
 @available(iOS 13, *)
-extension PassportReader {
+extension EIDReader {
     
     func startReading() {
         elementReadAttempts = 0
@@ -238,7 +257,13 @@ extension PassportReader {
                                 // If we have a masterlist url set then use that and verify the passport now
                                 self?.passport.verifyPassport(masterListURL: self?.masterListURL)
                                 self?.scanCompletedHandler( self?.passport, nil )
-
+                                    
+                                if self?.autoClose ?? false {
+                                    DispatchQueue.main.async { [weak self] in
+                                        self?.readerSession?.invalidate()
+                                    }
+                                }
+                                
                                 OpenSSLUtils.cleanupOpenSSL()
                             }
                         }

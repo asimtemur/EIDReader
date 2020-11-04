@@ -1,8 +1,9 @@
 //
 //  NFCPassportModel.swift
-//  NFCPassportReader
+//  EIDReader
 //
-//  Created by Andy Qua on 29/10/2019.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
 import UIKit
@@ -16,7 +17,7 @@ public struct DataGroupHash {
 }
 
 @available(iOS 13, *)
-public class NFCPassportModel {
+public class NFCIdentityModel {
     
     public private(set) lazy var documentType : String = { return String( passportDataElements?["5F03"]?.first ?? "?" ) }()
     public private(set) lazy var documentSubType : String = { return String( passportDataElements?["5F03"]?.last ?? "?" ) }()
@@ -77,7 +78,7 @@ public class NFCPassportModel {
     public private(set) var activeAuthenticationPassed : Bool = false
     public private(set) var verificationErrors : [Error] = []
 
-    public var passportImage : UIImage? {
+    public var identityImage : UIImage? {
         guard let dg2 = dataGroupsRead[.DG2] as? DataGroup2 else { return nil }
         
         return dg2.getImage()
@@ -142,7 +143,6 @@ public class NFCPassportModel {
     // Part 1 - Has the SOD (Security Object Document) been signed by a valid country signing certificate authority (CSCA)?
     // Part 2 - has it been tampered with (e.g. hashes of Datagroups match those in the SOD?
     //        guard let sod = model.getDataGroup(.SOD) else { return }
-
 
     public func verifyPassport( masterListURL: URL? ) {
         if let masterListURL = masterListURL {

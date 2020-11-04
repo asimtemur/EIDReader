@@ -1,8 +1,9 @@
 //
 //  X509Wrapper.swift
-//  NFCPassportReader
+//  EIDReader
 //
-//  Created by Andy Qua on 29/10/2019.
+//  Created by Volkan SÖNMEZ on 6.04.2020.
+//  Copyright © 2020 sonmez.volkan. All rights reserved.
 //
 
 import OpenSSL
@@ -153,3 +154,4 @@ public class X509Wrapper {
     }
     
 }
+
