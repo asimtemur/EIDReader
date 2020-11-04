@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
 
-  spec.name         = "EIDReader."
+  spec.name         = "EIDReader"
   spec.version      = "1.0.12"
   spec.summary      = "This package handles reading an NFC Enabled passport using iOS 13 CoreNFC APIS"
 
