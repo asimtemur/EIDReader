@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "EIDReader"
-  spec.version      = "1.0.14"
+  spec.version      = "1.0.15"
   spec.summary      = "This package handles reading an NFC Enabled passport using iOS 13 CoreNFC APIS"
 
   spec.homepage     = "https://github.com/asimtemur/EIDReader"
@@ -12,7 +12,7 @@ Pod::Spec.new do |spec|
 
   spec.source       = { :git => "https://github.com/asimtemur/EIDReader.git", :tag => "#{spec.version}" }
 
-  spec.source_files  = "**/*.{swift}"
+  spec.source_files  = "**/*.{h,swift}"
 
   spec.swift_version = "5.0"
 
