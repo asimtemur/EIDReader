@@ -2,8 +2,8 @@
 //  Logging.swift
 //  EIDReader
 //
-//  Created by Volkan SÖNMEZ on 6.04.2020.
-//  Copyright © 2020 sonmez.volkan. All rights reserved.
+//  Created by Asım Temür on 9.11.2020.
+//  Copyright © 2020 asim.temur All rights reserved.
 //
 
 import Foundation
